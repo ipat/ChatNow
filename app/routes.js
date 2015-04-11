@@ -1,3 +1,5 @@
+var Group       = require('../app/models/group');
+var User       = require('../app/models/user');
 module.exports = function(app, passport) {
 
 // normal routes ===============================================================
@@ -17,8 +19,13 @@ module.exports = function(app, passport) {
 
 	// GROUPS SECTION =========================
 	app.get('/groups', isLoggedIn, function(req, res) {
-		res.render('groups.ejs', {
-			user : req.user
+		Group.find({}, function(err, group) {
+			if(err) throw err;
+
+			res.render('groups.ejs', {
+				user : req.user,
+				groups: group
+			});			
 		});
 	});
 
@@ -207,7 +214,26 @@ module.exports = function(app, passport) {
 	app.post('/addGroup', function(req, res){
 		// res.render("hello");
 		// return "Hello";
-		console.log(req.body);
+		var user = req.user;
+		console.log(user);
+
+		var newGroup = Group({
+			name: req.body.groupName,
+			creatorId: user.id
+		});
+
+		newGroup.save(function(err, group) {
+			if(err) throw err;
+
+			User.findByIdAndUpdate(
+				user.id,
+				{$push: {"groups": {groupName: group.name, groupId: group.id, lastRead: 0}}},
+				{safe: true, upsert: true}, function(err, user){
+
+					res.redirect('/groups');
+					
+				});
+		});
 	});
 
 

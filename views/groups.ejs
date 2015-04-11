@@ -20,6 +20,19 @@
 	</div>
 
 	<div class="row">
+		<table class="table">
+			<tbody>
+				<% groups.forEach(function(group){ %>
+					<tr>
+						<td><%= group.name %></td>
+						<td><%= group.creatorId %></td>
+					</tr>
+				<% }) %>
+			</tbody>
+		</table>
+	</div>
+
+	<div class="row">
 
 		<!-- LOCAL INFORMATION -->
 		<div class="col-sm-6">
