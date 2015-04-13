@@ -1,7 +1,17 @@
 var Group       = require('../app/models/group');
 var User       = require('../app/models/user');
-module.exports = function(app, passport) {
 
+// var app = require('express')();
+
+if (!Date.now) {
+    Date.now = function() { return new Date().getTime(); }
+}
+
+
+module.exports = function(app, passport, server) {
+
+var http = require('http');
+var io = require('socket.io').listen(server);
 // normal routes ===============================================================
 
 	// show the home page (will also have our login links)
@@ -11,8 +21,10 @@ module.exports = function(app, passport) {
 
 	// PROFILE SECTION =========================
 	app.get('/profile', isLoggedIn, function(req, res) {
+
 		res.render('profile.ejs', {
-			user : req.user
+			user : req.user,
+			message: {}
 		});
 	});
 
@@ -202,24 +214,19 @@ module.exports = function(app, passport) {
 // CHAT ROOMS MANAGEMENT =======================================================
 // =============================================================================
 
-	// google ---------------------------------
-	app.get('/unlink/google', function(req, res) {
-		var user          = req.user;
-		user.google.token = undefined;
-		user.save(function(err) {
-			res.redirect('/profile');
-		});
-	});
 
 	app.post('/addGroup', function(req, res){
 		// res.render("hello");
 		// return "Hello";
 		var user = req.user;
-		console.log(user);
+		// console.log(user);
 
 		var newGroup = Group({
 			name: req.body.groupName,
-			creatorId: user.id
+			// messages: [{messageOwnerId: user.id, messageOwnerName: user.email, message: "First Message by " + user.local.email, time:new Date()}],
+			creatorId: user.id,
+			created_at: new Date(),
+			updated_at: new Date()
 		});
 
 		newGroup.save(function(err, group) {
@@ -234,6 +241,87 @@ module.exports = function(app, passport) {
 					
 				});
 		});
+	});
+
+	app.get('/chat/:groupId', function(req, res){
+		var groupId = req.params.groupId;
+
+		var user = req.user;
+		var userGroups = user.groups;
+		var inGroup = false;
+		var group;
+
+		for(var i = 0; i < userGroups.length; i++){
+			if(userGroups[i].groupId == groupId){
+				inGroup = true;
+				group = userGroups[i];
+				break;
+			}
+		}
+
+		if(!inGroup) {
+			res.redirect('/profile');
+			// console.log("failed");
+		} else {
+
+			Group.findById(
+				groupId,
+				function(err, groupInfo){
+
+					res.render('chat.ejs', {
+						user : req.user,
+						group : groupInfo,
+						message: {}
+					});
+					// io.on('connection', function(socket){
+					// 	socket.join(groupId);
+					// 	// console.log(groupInfo);
+
+					// });
+				});
+			// console.log(group);
+		}
+	});
+
+	io.on('connection', function(socket){
+	  socket.on('chat message', function(msg){
+	    console.log('message: ' + msg);
+	  });
+
+	  socket.on('create', function(room) {
+	  	socket.join(room);
+	  	console.log('Join Rooom ' + room);
+	  });
+
+	  socket.on('sendMessage', function(msg) {
+	  	// console.log('my message ');
+	  	// console.log(msg.room);
+
+	  	io.sockets.in(msg.room).emit('recieve', msg);
+	  	// console.log(socket.room);
+	  });
+	});
+
+	app.post('/chat/:groupId', function(req, res){
+		var groupId = req.params.groupId;
+
+		var user = req.user;
+		var userGroups = user.groups;
+		var inGroup = false;
+
+		// console.log("Test " + user.id + " " + groupId);
+		io.emit('chat message', {messageOwnerName: user.name, messageOwnerId: user.id, time: new Date(), message: req.body.message});
+		// var temp = usr + ' : ' + $('#m').val();
+		// io.on('connection', function(socket){
+		//   socket.on(groupId, function(msg){
+		//     io.emit(groupId, {messageOwnerName: user.name, messageOwnerId: user.id, time: new Date(), message: req.body.message});
+		//     console.log("Hello");
+		//     return;
+		//   });
+		// });
+        // socket.emit(groupId, {messageOwnerName: user.name, messageOwnerId: user.id, time: new Date(), message: req.body.message});
+        
+		
 	});
 
 

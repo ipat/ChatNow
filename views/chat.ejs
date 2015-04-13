@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+	<title>Node Authentication</title>
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<style>
+		body 		{ padding-top:80px; word-wrap:break-word; }
+	</style>
+</head>
+<body>
+<div class="container">
+
+	<div class="page-header text-center">
+		<h1><span class="fa fa-anchor"></span> <%=group.name %></h1>
+		<h2>Chatroom</h2>
+		<!-- <a href="/logout" class="btn btn-default btn-sm">Logout</a> -->
+	</div>
+
+	<div class="row">
+		<ul id="messages">
+			<% (group.messages).forEach(function(message){ %>
+				<li><b><%=message.messageOwnerName%></b> <%=message.message%></li>
+			<% }) %>	
+		</ul>
+		<%=user.id%>
+		<form action="/chat/<%=group.id %>" style="" id="submitMessage" method="POST">
+	      <input name="message" id="message" autocomplete="off" /><button type="submit" id="send">Send</button>
+	    </form>
+
+	</div>
+
+	<div class="text-center">
+		<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
+		<p>Visit the <a href="http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local">tutorial</a>.</p>
+	</div>
+
+</div>
+
+	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+
+    <script type="text/javascript">
+    	var socket = io();
+    	socket.emit('create', '<%=group.id %>');
+    	// socket.on(group.id, function(msg){
+	    //     // var temp = msg['name'] + " : " + msg['msg'];
+	    //     // if(msg['name']==user) {
+	    //     //   $('#messages').append($('<li style="font-weight: bold">').text(temp));
+	    //     //   console.log("hello");
+	    //     // }else {
+	    //       $('#messages').append($('<li>').text(msg.message));
+	    //     // }
+	        
+	    //   });
+
+    	$('form').submit(function(){
+		  event.preventDefault();
+		  console.log("HERE !");
+		  socket.emit('sendMessage', {
+		    message: $('#message').val(),
+		    messageOwnerName: '<%=user.local.email%>',
+		    messageOwnerId: '<%=user.id%>',
+		    time: new Date(),
+		    room: '<%=group.id %>'
+		  });
+		});
+
+		socket.on('callback', function(data) {
+		  console.log(data.done);
+		  // Print the data.data somewhere...
+		});
+
+		socket.on('recieve', function(data) {
+		  console.log(data);
+		  // Print the data.data somewhere...
+		});
+    </script>
+</body>
+</html>

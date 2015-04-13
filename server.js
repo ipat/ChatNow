@@ -13,6 +13,8 @@ app.use( bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
 })); 
+var http = require('http').Server(app);
+var io = require('socket.io')(http);
 
 var configDB = require('./config/database.js');
 
@@ -38,9 +40,9 @@ app.configure(function() {
 
 });
 
-// routes ======================================================================
-require('./app/routes.js')(app, passport); // load our routes and pass in our app and fully configured passport
 
 // launch ======================================================================
-app.listen(port);
+var server = app.listen(port);
+// routes ======================================================================
+require('./app/routes.js')(app, passport, server); // load our routes and pass in our app and fully configured passport
 console.log('The magic happens on port ' + port);
