@@ -21,11 +21,22 @@ var io = require('socket.io').listen(server);
 
 	// PROFILE SECTION =========================
 	app.get('/profile', isLoggedIn, function(req, res) {
-
-		res.render('profile.ejs', {
-			user : req.user,
-			message: {}
+		Group.find({}, function(err, groups) {
+			for(var i = 0;  i < req.user.groups.length; i++){
+				for(var j = 0; j < groups.length; j++){
+					if(req.user.groups[i].groupId.toString() == groups[j].id.toString()){
+						req.user.groups[i].unseen = groups[j].messages.length - req.user.groups[i].lastRead;
+						break;
+					}
+				}
+			}
+			console.log(req.user);
+			res.render('profile.ejs', {
+				user : req.user,
+				message: {}
+			});
 		});
+		
 	});
 
 

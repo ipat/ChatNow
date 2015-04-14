@@ -7,6 +7,7 @@ var app      = express();
 var port     = process.env.PORT || 8080;
 var mongoose = require('mongoose');
 var passport = require('passport');
+var path = require('path');
 var flash    = require('connect-flash');
 var bodyParser = require('body-parser')
 app.use( bodyParser.json() );       // to support JSON-encoded bodies
@@ -17,6 +18,7 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 var configDB = require('./config/database.js');
+app.use(express.static(path.join(__dirname, 'public')));
 
 // configuration ===============================================================
 mongoose.connect(configDB.url); // connect to our database

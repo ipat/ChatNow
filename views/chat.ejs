@@ -4,38 +4,77 @@
 	<title>Node Authentication</title>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<link rel="stylesheet" href="../css/style.css">
 	<style>
-		body 		{ padding-top:80px; word-wrap:break-word; }
+		body 		{  word-wrap:break-word; }
 	</style>
 </head>
 <body>
-<div class="container">
-
-	<div class="page-header text-center">
-		<h1><span class="fa fa-anchor"></span> <%=group.name %></h1>
-		<h2>Chatroom</h2>
-		<!-- <a href="/logout" class="btn btn-default btn-sm">Logout</a> -->
+<div class="header">
+	<div class="weblogo">
+		<a href="/profile">ChatNow </a>|
+		<span style="font-size:0.8em; line-height: 1em;"><i class="fa fa-comment"></i> <%=group.name %></span>
 	</div>
-
-	<div class="row">
-		<ul id="messages">
-			<% (group.messages).forEach(function(message){ %>
-				<li><b><%=message.messageOwnerName%></b> <%=message.message%></li>
-			<% }) %>	
+</div>
+<div>
+	<div class="col-md-3 sidebar">
+		<ul>
+			<li><a href="/profile">Profile</a></li>
+			<li>Chat Group</li>
+			<ul>
+				<% (user.groups).forEach(function(groupList){ %>
+					<li class="<%if(groupList.groupId.toString() == group.id.toString()) { %>active<% }%>"><a href="/chat/<%=groupList.groupId%>"><%=groupList.groupName%></a></li>
+				<% }) %>
+			</ul>
+			<li><a href="/logout">Logout</a></li>
 		</ul>
-		<%=user.id%>
-		<form action="/chat/<%=group.id %>" style="" id="submitMessage" method="POST">
-	      <input name="message" id="message" autocomplete="off" /><button type="submit" id="send">Send</button>
-	    </form>
-
 	</div>
 
-	<div class="text-center">
-		<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
-		<p>Visit the <a href="http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local">tutorial</a>.</p>
+	<div class="col-md-9 content space-top">
+		<!-- <div class="text-center">
+			<h1><span class="fa fa-anchor"></span> <%=group.name %></h1>
+			<h2>Chatroom</h2>
+			<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+		</div> -->
+
+		<!-- <div class="head-chat">
+			<i class="fa fa-comment"></i> <%=group.name %>
+		</div>
+		<hr> -->
+
+
+		<div class="row">
+			<ul id="messages">
+				<% (group.messages).forEach(function(message){ %>
+					<%if(message.messageOwnerId.toString() == user.id.toString()){ %>
+						<li class="myMessage float-right"><div class="msgBody-right float-left"><b><%=message.message%></b></div><div class="msgOwner float-left"><%=message.messageOwnerName%></div> </li>
+						<div class="clear"></div>
+					<%} else {%>
+						<li class="float-left"><div class="msgOwner float-left"><%=message.messageOwnerName%></div> <div class="msgBody-left float-left"><b><%=message.message%></b></div></li>
+						<div class="clear"></div>
+					<% } %>
+				<% }) %>	
+
+				<!-- <div style="height: 7em;"></div> -->
+			</ul>
+			<div class="col-md-12 msgbox">
+				<form action="/chat/<%=group.id %>" style="text-align:center;" id="submitMessage" method="POST">
+					<input name="message" id="message" autocomplete="off" placeholder="Type your message here..." />
+		      		<button type="submit" id="send" class="sendButton">&#8657;</button>
+			      
+			    </form>
+			</div>
+			
+
+		</div>
+
+		
 	</div>
 
 </div>
+
+	
+
 
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
@@ -48,6 +87,7 @@
     	dataRead.room = '<%=group.id %>';
     	dataRead.lastMsgIndex = '<%=group.messages.length %>';
     	socket.emit('read', dataRead);
+    	$(".content").animate({ scrollTop: $('.content')[0].scrollHeight}, 500);
     	// socket.on(group.id, function(msg){
 	    //     // var temp = msg['name'] + " : " + msg['msg'];
 	    //     // if(msg['name']==user) {
@@ -60,15 +100,22 @@
 	    //   });
 
     	$('form').submit(function(){
+
 		  event.preventDefault();
-		  console.log("HERE !");
-		  socket.emit('sendMessage', {
-		    message: $('#message').val(),
-		    messageOwnerName: '<%=user.local.email%>',
-		    messageOwnerId: '<%=user.id%>',
-		    time: new Date(),
-		    room: '<%=group.id %>'
-		  });
+    	  if($('#message').val().trim() !== '') {
+    	  	  var msg = $('#message').val();
+    	  	  $('#message').val('');
+			  console.log("HERE !");
+			  socket.emit('sendMessage', {
+			    message: msg,
+			    messageOwnerName: '<%=user.local.email%>',
+			    messageOwnerId: '<%=user.id%>',
+			    time: new Date(),
+			    room: '<%=group.id %>'
+			  });
+		   }
+
+		  
 		});
 
 		socket.on('callback', function(data) {
@@ -77,11 +124,20 @@
 		});
 
 		socket.on('recieve', function(data) {
-		  console.log(data);
+		  // console.log(data);
 		  data.userId = '<%=user.id %>';
 		  socket.emit('read', data);
-		  var temp = "<b>" + data.messageOwnerName + "</b> " + data.message;
-		  $('#messages').append($('<li>').text(temp));
+		  if(data.messageOwnerId.toString() == '<%=user.id.toString()%>') {
+		  	var temp = "<li class='myMessage float-right'><div class='msgBody-right float-left'><b>" + data.message + "</b></div><div class='msgOwner float-left'>" + data.messageOwnerName + "</div> </li><div class='clear'></div>";
+		  	$('#messages').append(temp);
+		  } else {
+		  	var temp = "<li class='float-left'><div class='msgOwner float-left'>" + data.messageOwnerName + "</div> <div class='msgBody-left float-left'><b>" + data.message + "</b></div></li><div class='clear'></div>";
+		  	$('#messages').append(temp);
+		  }
+		  // var temp = "<b>" + data.messageOwnerName + "</b> " + data.message;
+		  // $('#messages').append('<li>'+(temp)+'</li>');
+		  
+		  $(".content").animate({ scrollTop: $('.content')[0].scrollHeight}, 500);
 		  // Print the data.data somewhere...
 		});
     </script>
