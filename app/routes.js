@@ -29,17 +29,6 @@ var io = require('socket.io').listen(server);
 	});
 
 
-	// GROUPS SECTION =========================
-	app.get('/groups', isLoggedIn, function(req, res) {
-		Group.find({}, function(err, group) {
-			if(err) throw err;
-
-			res.render('groups.ejs', {
-				user : req.user,
-				groups: group
-			});			
-		});
-	});
 
 	// LOGOUT ==============================
 	app.get('/logout', function(req, res) {
@@ -215,6 +204,55 @@ var io = require('socket.io').listen(server);
 // =============================================================================
 
 
+	// GROUPS SECTION =========================
+	app.get('/groups', isLoggedIn, function(req, res) {
+		var groups = [];
+
+		Group.find({}, function(err, group) {
+			// console.log(group);
+			for(var i = 0; i < group.length; i++){
+				var contain = false;
+				for(var j = 0; j < req.user.groups.length; j++){
+					console.log(group[i].id + " - " + req.user.groups[j].groupId);
+					if(group[i].id.toString() == req.user.groups[j].groupId.toString())
+					{
+						console.log("Delete");
+						contain = true;
+						break;
+					}
+				}
+
+				if(contain == false)
+					groups.push(group[i]);
+
+			}
+
+			if(err) throw err;
+
+			res.render('groups.ejs', {
+				user : req.user,
+				groups: groups
+			});			
+		});
+	});
+
+	app.get('/join/:groupId', function(req, res) {
+		var groupId = req.params.groupId;
+		var user = req.user;
+
+		Group.findById(groupId, function(err, groupInfo){
+			User.findByIdAndUpdate(
+				user.id,
+				{$push: {"groups": {groupName: groupInfo.name, groupId: groupInfo.id, lastRead: 0}}},
+				{safe: true, upsert: true}, function(err, user){
+
+					res.redirect('/profile');
+					
+				});
+		});
+		
+	});
+
 	app.post('/addGroup', function(req, res){
 		// res.render("hello");
 		// return "Hello";
@@ -293,11 +331,38 @@ var io = require('socket.io').listen(server);
 	  	console.log('Join Rooom ' + room);
 	  });
 
+	  socket.on('read', function(info) {
+	  	// console.log('Join Rooom ' + room);
+	  	// User.findById(info.userId,
+	  	// 	function(err, user){
+	  			User.update(
+	  				{'_id': info.userId, 'groups.groupId': info.room}
+	  				, {'$set': {'groups.$.lastRead': info.lastMsgIndex}}
+	  				, function(err, user){
+	  				if(err) throw err;
+
+	  				console.log(user);
+	  			});
+	  		// });
+	  });
+
 	  socket.on('sendMessage', function(msg) {
 	  	// console.log('my message ');
 	  	// console.log(msg.room);
+	  	saveMsg = {};
+	  	saveMsg.messageOwnerId = msg.messageOwnerId;
+	  	saveMsg.messageOwnerName = msg.messageOwnerName;
+	  	saveMsg.message = msg.message;
+	  	saveMsg.time = new Date();
+	  	Group.findByIdAndUpdate(
+	  		msg.room, 
+	  		{$push: {messages:saveMsg}},
+	  		function(err, groupInfo){
+	  			msg.lastMsgIndex = groupInfo.messages.length;
+	  			io.sockets.in(msg.room).emit('recieve', msg);
+	  		});
 
-	  	io.sockets.in(msg.room).emit('recieve', msg);
+	  	
 	  	// console.log(socket.room);
 	  });
 	});

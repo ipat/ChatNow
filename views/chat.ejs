@@ -43,6 +43,11 @@
     <script type="text/javascript">
     	var socket = io();
     	socket.emit('create', '<%=group.id %>');
+    	var dataRead = {};
+    	dataRead.userId = '<%=user.id%>';
+    	dataRead.room = '<%=group.id %>';
+    	dataRead.lastMsgIndex = '<%=group.messages.length %>';
+    	socket.emit('read', dataRead);
     	// socket.on(group.id, function(msg){
 	    //     // var temp = msg['name'] + " : " + msg['msg'];
 	    //     // if(msg['name']==user) {
@@ -73,6 +78,10 @@
 
 		socket.on('recieve', function(data) {
 		  console.log(data);
+		  data.userId = '<%=user.id %>';
+		  socket.emit('read', data);
+		  var temp = "<b>" + data.messageOwnerName + "</b> " + data.message;
+		  $('#messages').append($('<li>').text(temp));
 		  // Print the data.data somewhere...
 		});
     </script>
