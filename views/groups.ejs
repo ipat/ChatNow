@@ -18,7 +18,22 @@
 		  New Group
 		</button>
 	</div>
-
+	My Groups
+	<div class="row">
+		<table class="table">
+			<tbody>
+				<% (user.groups).forEach(function(group,i){ %>
+					<tr>
+						<td><a href="/chat/<%=group.groupId%>"><%= group.groupName %></a></td>
+						<td><%= group.unseen %></td>
+						<td><%= own[i] %></td>
+						<td><a href="/leave/<%= group.groupId %>">Leave</a></td>
+					</tr>
+				<% }) %>
+			</tbody>
+		</table>
+	</div>
+	Other Groups
 	<div class="row">
 		<table class="table">
 			<tbody>
@@ -26,6 +41,7 @@
 					<tr>
 						<td><%= group.name %></td>
 						<td><%= group.creatorId %></td>
+						<td><%= group.unseen %></td>
 						<td><a href="/join/<%= group.id %>">Join</a></td>
 					</tr>
 				<% }) %>
@@ -33,28 +49,7 @@
 		</table>
 	</div>
 
-	<div class="row">
-
-		<!-- LOCAL INFORMATION -->
-		<div class="col-sm-6">
-			<div class="well">
-				<h3><span class="fa fa-user"></span> Local</h3>
-
-				<% if (user.local.email) { %>
-					<p>
-						<strong>id</strong>: <%= user._id %><br>
-						<strong>email</strong>: <%= user.local.email %><br>
-						<strong>password</strong>: <%= user.local.password %>
-					</p>
-					
-					<a href="/unlink/local" class="btn btn-default">Unlink</a>
-				<% } else { %>
-					<a href="/connect/local" class="btn btn-default">Connect Local</a>
-				<% } %>
-
-			</div>
-		</div>
-	</div>
+	
 
 	<div class="text-center">
 		<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>

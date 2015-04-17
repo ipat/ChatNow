@@ -21,6 +21,8 @@ var io = require('socket.io').listen(server);
 
 	// PROFILE SECTION =========================
 	app.get('/profile', isLoggedIn, function(req, res) {
+		var ugroups = [];
+		var jgroups = [];
 		Group.find({}, function(err, groups) {
 			for(var i = 0;  i < req.user.groups.length; i++){
 				for(var j = 0; j < groups.length; j++){
@@ -31,10 +33,42 @@ var io = require('socket.io').listen(server);
 				}
 			}
 			console.log(req.user);
-			res.render('profile.ejs', {
-				user : req.user,
-				message: {}
+			Group.find({}, function(err, group) {
+			// console.log(group);
+				for(var i = 0; i < group.length; i++){
+					var contain = false;
+					for(var j = 0; j < req.user.groups.length; j++){
+						console.log(group[i].id + " - " + req.user.groups[j].groupId);
+						if(group[i].id.toString() == req.user.groups[j].groupId.toString())
+						{
+							console.log("Delete");
+							contain = true;
+
+							if(group[i].creatorId == req.user.userId)
+								jgroups[i] = true;
+							else 
+								jgroups[i] = false;
+							jgroups.push(group[i]);
+							break;
+						}
+					}
+
+					if(contain == false)
+						ugroup.push(group[i]);
+
+				}
+
+				if(err) throw err;
+				console.log('ooooooooo ' + jgroups)
+
+				res.render('profile.ejs', {
+					user : req.user,
+					own : jgroups,
+					groups: ugroups,
+					message: {}
+				});			
 			});
+
 		});
 		
 	});
@@ -60,7 +94,7 @@ var io = require('socket.io').listen(server);
 
 		// process the login form
 		app.post('/login', passport.authenticate('local-login', {
-			successRedirect : '/profile', // redirect to the secure profile section
+			successRedirect : '/groups', // redirect to the secure profile section
 			failureRedirect : '/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
@@ -218,32 +252,54 @@ var io = require('socket.io').listen(server);
 	// GROUPS SECTION =========================
 	app.get('/groups', isLoggedIn, function(req, res) {
 		var groups = [];
-
-		Group.find({}, function(err, group) {
-			// console.log(group);
-			for(var i = 0; i < group.length; i++){
-				var contain = false;
-				for(var j = 0; j < req.user.groups.length; j++){
-					console.log(group[i].id + " - " + req.user.groups[j].groupId);
-					if(group[i].id.toString() == req.user.groups[j].groupId.toString())
-					{
-						console.log("Delete");
-						contain = true;
+		var unjoined = [];
+		var jgroups = [];
+		Group.find({}, function(err, groups) {
+			for(var i = 0;  i < req.user.groups.length; i++){
+				for(var j = 0; j < groups.length; j++){
+					if(req.user.groups[i].groupId.toString() == groups[j].id.toString()){
+						req.user.groups[i].unseen = groups[j].messages.length - req.user.groups[i].lastRead;
 						break;
 					}
 				}
-
-				if(contain == false)
-					groups.push(group[i]);
-
 			}
+			console.log(req.user);
+			Group.find({}, function(err, group) {
+			// console.log(group);
+				for(var i = 0; i < group.length; i++){
+					var contain = false;
+					for(var j = 0; j < req.user.groups.length; j++){
+						console.log(group[i].id + " - " + req.user.groups[j].groupId);
+						if(group[i].id.toString() == req.user.groups[j].groupId.toString())
+						{
+							console.log("Delete");
+							contain = true;
+							console.log('CHECK ' + group[i].creatorId + '-' + req.user._id + ' = ' + (group[i].creatorId == req.user._id));
+							if(group[i].creatorId.toString == req.user._id.toString)
+								jgroups[i] = true;
+							else 
+								jgroups[i] = false;
+							jgroups.push(group[i]);
+							break;
+						}
+					}
 
-			if(err) throw err;
+					if(contain == false)
+						unjoined.push(group[i]);
+				}
 
-			res.render('groups.ejs', {
-				user : req.user,
-				groups: groups
-			});			
+				if(err) throw err;
+
+				console.log('ooooooooo ' + jgroups)
+				console.log('USERRR' + req.user);
+
+				res.render('groups.ejs', {
+					user : req.user,
+					own : jgroups,
+					groups: unjoined,
+					message: {}
+				});			
+			});
 		});
 	});
 
@@ -257,7 +313,25 @@ var io = require('socket.io').listen(server);
 				{$push: {"groups": {groupName: groupInfo.name, groupId: groupInfo.id, lastRead: 0}}},
 				{safe: true, upsert: true}, function(err, user){
 
-					res.redirect('/profile');
+					res.redirect('/groups');
+					
+				});
+		});
+		
+	});
+	app.get('/leave/:groupId', function(req, res) {
+		var groupId = req.params.groupId;
+		var user = req.user;
+		console.log('gid ' + groupId);
+
+		Group.findById(groupId, function(err, groupInfo){
+			console.log(groupInfo);
+			User.findByIdAndUpdate(
+				user.id,
+				{$pull: {"groups": {groupId: groupInfo.id}}},
+				{safe: true, upsert: true}, function(err, user){
+
+					res.redirect('/groups');
 					
 				});
 		});
@@ -352,7 +426,7 @@ var io = require('socket.io').listen(server);
 	  				, function(err, user){
 	  				if(err) throw err;
 
-	  				console.log(user);
+	  				//console.log(user);
 	  			});
 	  		// });
 	  });
