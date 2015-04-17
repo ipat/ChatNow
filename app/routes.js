@@ -404,6 +404,7 @@ var io = require('socket.io').listen(server);
 		var userGroups = user.groups;
 		var inGroup = false;
 		var group;
+		var lastRead = 0;
 
 		for(var i = 0; i < userGroups.length; i++){
 			if(userGroups[i].groupId == groupId){
@@ -417,6 +418,7 @@ var io = require('socket.io').listen(server);
 			res.redirect('/profile');
 			// console.log("failed");
 		} else {
+			// var unreadNum = groupInfo.messages.length - group.lastRead;
 
 			Group.findById(
 				groupId,
@@ -425,7 +427,8 @@ var io = require('socket.io').listen(server);
 					res.render('chat.ejs', {
 						user : req.user,
 						group : groupInfo,
-						message: {}
+						message: {},
+						unread: group.lastRead
 					});
 					// io.on('connection', function(socket){
 					// 	socket.join(groupId);

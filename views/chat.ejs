@@ -46,12 +46,18 @@
 
 		<div class="row">
 			<ul id="messages">
-				<% (group.messages).forEach(function(message){ %>
+				<% (group.messages).forEach(function(message, i){ %>
 					<%if(message.messageOwnerId.toString() == user.id.toString()){ %>
 						<li class="myMessage float-right"><div class="msgBody-right float-left"><b><%=message.message%></b></div><div class="msgOwner float-left"><%=message.messageOwnerName%></div> </li>
 						<div class="clear"></div>
 					<%} else {%>
-						<li class="float-left"><div class="msgOwner float-left"><%=message.messageOwnerName%></div> <div class="msgBody-left float-left"><b><%=message.message%></b></div></li>
+						<li class="float-left"><div class="msgOwner float-left"><%=message.messageOwnerName%></div> 
+							<% if(i <= unread -1) {%>
+								<div class="msgBody-left float-left"><b><%=message.message%></b></div>
+							<%} else {%>
+								<div class="msgBody-left-unread float-left"><b><%=message.message%></b></div>
+							<%}%>
+						</li>
 						<div class="clear"></div>
 					<% } %>
 				<% }) %>	
