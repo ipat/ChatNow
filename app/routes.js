@@ -21,6 +21,8 @@ var io = require('socket.io').listen(server);
 
 	// PROFILE SECTION =========================
 	app.get('/profile', isLoggedIn, function(req, res) {
+		var ugroups = [];
+		var jgroups = [];
 		Group.find({}, function(err, groups) {
 			for(var i = 0;  i < req.user.groups.length; i++){
 				for(var j = 0; j < groups.length; j++){
@@ -31,10 +33,42 @@ var io = require('socket.io').listen(server);
 				}
 			}
 			console.log(req.user);
-			res.render('profile.ejs', {
-				user : req.user,
-				message: {}
+			Group.find({}, function(err, group) {
+			// console.log(group);
+				for(var i = 0; i < group.length; i++){
+					var contain = false;
+					for(var j = 0; j < req.user.groups.length; j++){
+						console.log(group[i].id + " - " + req.user.groups[j].groupId);
+						if(group[i].id.toString() == req.user.groups[j].groupId.toString())
+						{
+							console.log("Delete");
+							contain = true;
+
+							if(group[i].creatorId == req.user.userId)
+								jgroups[i] = true;
+							else 
+								jgroups[i] = false;
+							jgroups.push(group[i]);
+							break;
+						}
+					}
+
+					if(contain == false)
+						ugroup.push(group[i]);
+
+				}
+
+				if(err) throw err;
+				console.log('ooooooooo ' + jgroups)
+
+				res.render('profile.ejs', {
+					user : req.user,
+					own : jgroups,
+					groups: ugroups,
+					message: {}
+				});			
 			});
+
 		});
 		
 	});
@@ -60,7 +94,7 @@ var io = require('socket.io').listen(server);
 
 		// process the login form
 		app.post('/login', passport.authenticate('local-login', {
-			successRedirect : '/profile', // redirect to the secure profile section
+			successRedirect : '/groups', // redirect to the secure profile section
 			failureRedirect : '/login', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
@@ -78,6 +112,42 @@ var io = require('socket.io').listen(server);
 			failureFlash : true // allow flash messages
 		}));
 
+	// facebook -------------------------------
+
+		// send to facebook to do the authentication
+		app.get('/auth/facebook', passport.authenticate('facebook', { scope : 'email' }));
+
+		// handle the callback after facebook has authenticated the user
+		app.get('/auth/facebook/callback',
+			passport.authenticate('facebook', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
+
+	// twitter --------------------------------
+
+		// send to twitter to do the authentication
+		app.get('/auth/twitter', passport.authenticate('twitter', { scope : 'email' }));
+
+		// handle the callback after twitter has authenticated the user
+		app.get('/auth/twitter/callback',
+			passport.authenticate('twitter', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
+
+
+	// google ---------------------------------
+
+		// send to google to do the authentication
+		app.get('/auth/google', passport.authenticate('google', { scope : ['profile', 'email'] }));
+
+		// the callback after google has authenticated the user
+		app.get('/auth/google/callback',
+			passport.authenticate('google', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
 
 // =============================================================================
 // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
@@ -93,7 +163,42 @@ var io = require('socket.io').listen(server);
 			failureFlash : true // allow flash messages
 		}));
 
+	// facebook -------------------------------
 
+		// send to facebook to do the authentication
+		app.get('/connect/facebook', passport.authorize('facebook', { scope : 'email' }));
+
+		// handle the callback after facebook has authorized the user
+		app.get('/connect/facebook/callback',
+			passport.authorize('facebook', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
+
+	// twitter --------------------------------
+
+		// send to twitter to do the authentication
+		app.get('/connect/twitter', passport.authorize('twitter', { scope : 'email' }));
+
+		// handle the callback after twitter has authorized the user
+		app.get('/connect/twitter/callback',
+			passport.authorize('twitter', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
+
+
+	// google ---------------------------------
+
+		// send to google to do the authentication
+		app.get('/connect/google', passport.authorize('google', { scope : ['profile', 'email'] }));
+
+		// the callback after google has authorized the user
+		app.get('/connect/google/callback',
+			passport.authorize('google', {
+				successRedirect : '/profile',
+				failureRedirect : '/'
+			}));
 
 // =============================================================================
 // UNLINK ACCOUNTS =============================================================
@@ -112,6 +217,32 @@ var io = require('socket.io').listen(server);
 		});
 	});
 
+	// facebook -------------------------------
+	app.get('/unlink/facebook', function(req, res) {
+		var user            = req.user;
+		user.facebook.token = undefined;
+		user.save(function(err) {
+			res.redirect('/profile');
+		});
+	});
+
+	// twitter --------------------------------
+	app.get('/unlink/twitter', function(req, res) {
+		var user           = req.user;
+		user.twitter.token = undefined;
+		user.save(function(err) {
+			res.redirect('/profile');
+		});
+	});
+
+	// google ---------------------------------
+	app.get('/unlink/google', function(req, res) {
+		var user          = req.user;
+		user.google.token = undefined;
+		user.save(function(err) {
+			res.redirect('/profile');
+		});
+	});
 
 // =============================================================================
 // CHAT ROOMS MANAGEMENT =======================================================
@@ -121,32 +252,54 @@ var io = require('socket.io').listen(server);
 	// GROUPS SECTION =========================
 	app.get('/groups', isLoggedIn, function(req, res) {
 		var groups = [];
-
-		Group.find({}, function(err, group) {
-			// console.log(group);
-			for(var i = 0; i < group.length; i++){
-				var contain = false;
-				for(var j = 0; j < req.user.groups.length; j++){
-					console.log(group[i].id + " - " + req.user.groups[j].groupId);
-					if(group[i].id.toString() == req.user.groups[j].groupId.toString())
-					{
-						console.log("Delete");
-						contain = true;
+		var unjoined = [];
+		var jgroups = [];
+		Group.find({}, function(err, groups) {
+			for(var i = 0;  i < req.user.groups.length; i++){
+				for(var j = 0; j < groups.length; j++){
+					if(req.user.groups[i].groupId.toString() == groups[j].id.toString()){
+						req.user.groups[i].unseen = groups[j].messages.length - req.user.groups[i].lastRead;
 						break;
 					}
 				}
-
-				if(contain == false)
-					groups.push(group[i]);
-
 			}
+			console.log(req.user);
+			Group.find({}, function(err, group) {
+			// console.log(group);
+				for(var i = 0; i < group.length; i++){
+					var contain = false;
+					for(var j = 0; j < req.user.groups.length; j++){
+						console.log(group[i].id + " - " + req.user.groups[j].groupId);
+						if(group[i].id.toString() == req.user.groups[j].groupId.toString())
+						{
+							console.log("Delete");
+							contain = true;
+							console.log('CHECK ' + group[i].creatorId + '-' + req.user._id + ' = ' + (group[i].creatorId == req.user._id));
+							if(group[i].creatorId.toString == req.user._id.toString)
+								jgroups[i] = true;
+							else 
+								jgroups[i] = false;
+							jgroups.push(group[i]);
+							break;
+						}
+					}
 
-			if(err) throw err;
+					if(contain == false)
+						unjoined.push(group[i]);
+				}
 
-			res.render('groups.ejs', {
-				user : req.user,
-				groups: groups
-			});			
+				if(err) throw err;
+
+				console.log('ooooooooo ' + jgroups)
+				console.log('USERRR' + req.user);
+
+				res.render('groups.ejs', {
+					user : req.user,
+					own : jgroups,
+					groups: unjoined,
+					message: {}
+				});			
+			});
 		});
 	});
 
@@ -160,7 +313,25 @@ var io = require('socket.io').listen(server);
 				{$push: {"groups": {groupName: groupInfo.name, groupId: groupInfo.id, lastRead: 0}}},
 				{safe: true, upsert: true}, function(err, user){
 
-					res.redirect('/profile');
+					res.redirect('/groups');
+					
+				});
+		});
+		
+	});
+	app.get('/leave/:groupId', function(req, res) {
+		var groupId = req.params.groupId;
+		var user = req.user;
+		console.log('gid ' + groupId);
+
+		Group.findById(groupId, function(err, groupInfo){
+			console.log(groupInfo);
+			User.findByIdAndUpdate(
+				user.id,
+				{$pull: {"groups": {groupId: groupInfo.id}}},
+				{safe: true, upsert: true}, function(err, user){
+
+					res.redirect('/groups');
 					
 				});
 		});
@@ -255,7 +426,7 @@ var io = require('socket.io').listen(server);
 	  				, function(err, user){
 	  				if(err) throw err;
 
-	  				console.log(user);
+	  				//console.log(user);
 	  			});
 	  		// });
 	  });
