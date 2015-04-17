@@ -275,11 +275,11 @@ var io = require('socket.io').listen(server);
 							console.log("Delete");
 							contain = true;
 							console.log('CHECK ' + group[i].creatorId + '-' + req.user._id + ' = ' + (group[i].creatorId == req.user._id));
-							if(group[i].creatorId.toString == req.user._id.toString)
-								jgroups[i] = true;
+							if(group[i].creatorId.toString() == req.user._id.toString())
+								jgroups[j] = true;
 							else 
-								jgroups[i] = false;
-							jgroups.push(group[i]);
+								jgroups[j] = false;
+							// jgroups.push(group[i]);
 							break;
 						}
 					}
