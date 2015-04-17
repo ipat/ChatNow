@@ -319,6 +319,37 @@ var io = require('socket.io').listen(server);
 		});
 		
 	});
+
+	app.get('/delete/:groupId', function(req, res) {
+		var groupId = req.params.groupId;
+		var user = req.user;
+
+		// Group.findById(groupId, function(err, groupInfo){
+		// 	User.findByIdAndUpdate(
+		// 		user.id,
+		// 		{$push: {"groups": {groupName: groupInfo.name, groupId: groupInfo.id, lastRead: 0}}},
+		// 		{safe: true, upsert: true}, function(err, user){
+
+		// 			res.redirect('/groups');
+					
+		// 		});
+		// });
+		Group.find({_id: groupId, 'creatorId': user.id}).remove(function(err) {
+			
+		});
+
+		User.update(
+				{},
+				{$pull: {"groups": {groupId: groupId}}},
+				{safe: true, upsert: true, multi: true}, function(err, user){
+
+					res.redirect('/groups');
+					
+				});
+
+	});
+
+
 	app.get('/leave/:groupId', function(req, res) {
 		var groupId = req.params.groupId;
 		var user = req.user;

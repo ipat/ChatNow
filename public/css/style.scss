@@ -203,6 +203,31 @@ hr{
 	left: -17px;
 	top: 14px;
 }
+
+.msgBody-left-unread {
+	background-color: lighten($webtheme, 20%);
+	border-radius: 20px;
+	margin-bottom: 1em;
+	margin-top: 0px;
+	margin-left: 1em;
+	margin-right: 1em;
+	padding: 1em;
+	position: relative;
+}
+
+.msgBody-left-unread:after 
+{
+	content: '';
+	position: absolute;
+	border-style: solid;
+	border-width: 9px 17px 9px 0;
+	border-color: transparent lighten($webtheme, 20%);
+	display: block;
+	width: 0;
+	z-index: 1;
+	left: -17px;
+	top: 14px;
+}
 .msgBody-right {
 	background-color: darken(white, 10%);
 	border-radius: 20px;

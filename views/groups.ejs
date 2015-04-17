@@ -26,7 +26,12 @@
 					<tr>
 						<td><a href="/chat/<%=group.groupId%>"><%= group.groupName %></a></td>
 						<td><%= group.unseen %></td>
-						<td><%= own[i] %></td>
+						<td>
+							<% if(own[i]) {%>
+								<a href="/delete/<%= group.groupId %>">Delete</a>
+							<%} %>
+
+						</td>
 						<td><a href="/leave/<%= group.groupId %>">Leave</a></td>
 					</tr>
 				<% }) %>
@@ -50,11 +55,6 @@
 	</div>
 
 	
-
-	<div class="text-center">
-		<p>A demo by <a href="http://scotch.io">Scotch</a>.</p>
-		<p>Visit the <a href="http://scotch.io/tutorials/javascript/easy-node-authentication-setup-and-local">tutorial</a>.</p>
-	</div>
 
 	<div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	  <div class="modal-dialog">
