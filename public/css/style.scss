@@ -176,7 +176,15 @@ hr{
 	color: white;
 	overflow: hidden;
 	@include longshadow(darken($webtheme, 10% ));
-	margin-bottom: 0.5em;
+	// margin-bottom: 0.5em;
+}
+
+.msgName {
+	text-align: center;
+	color: $webtheme;
+	font-weight: bold;
+	font-size: 0.8em;
+	margin-bottom: 1.5em;
 }
 
 .msgBody-left {
