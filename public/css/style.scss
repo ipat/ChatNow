@@ -22,7 +22,7 @@
 
 }
 
-$webtheme: #3498db;
+$webtheme: #323232;
 
 body, h1, h2, h3, h4, h5, h6 {
 	font-family: 'rsuregular';
@@ -189,11 +189,17 @@ hr{
 }
 
 .msgName {
-	text-align: center;
-	color: $webtheme;
+	text-align: left;
+	color: lighten($webtheme, 25%);
 	font-weight: bold;
+	font-size: 0.7em;
+	margin-bottom: 0em;
+	// margin-botto
+}
+
+.msgTime {
 	font-size: 0.8em;
-	margin-bottom: 1.5em;
+	color: lighten($webtheme, 30%);
 }
 
 .msgBody-left {
@@ -202,8 +208,8 @@ hr{
 	margin-bottom: 1em;
 	margin-top: 0px;
 	margin-left: 1em;
-	margin-right: 1em;
-	padding: 1em;
+	margin-right: 0.5em;
+	padding: 0.5em 1em 0.5em;
 	position: relative;
 }
 
@@ -212,7 +218,7 @@ hr{
 	content: '';
 	position: absolute;
 	border-style: solid;
-	border-width: 9px 17px 9px 0;
+	border-width: 9px 20px 9px 0;
 	border-color: transparent darken(white, 10%);
 	display: block;
 	width: 0;
@@ -222,14 +228,16 @@ hr{
 }
 
 .msgBody-left-unread {
+	@extend .msgBody-left;
+	color: white;
 	background-color: lighten($webtheme, 20%);
-	border-radius: 20px;
-	margin-bottom: 1em;
-	margin-top: 0px;
-	margin-left: 1em;
-	margin-right: 1em;
-	padding: 1em;
-	position: relative;
+	// border-radius: 20px;
+	// margin-bottom: 1em;
+	// margin-top: 0px;
+	// margin-left: 1em;
+	// margin-right: 1em;
+	// padding: 1em;
+	// position: relative;
 }
 
 .msgBody-left-unread:after 
@@ -237,7 +245,7 @@ hr{
 	content: '';
 	position: absolute;
 	border-style: solid;
-	border-width: 9px 17px 9px 0;
+	border-width: 9px 20px 9px 0;
 	border-color: transparent lighten($webtheme, 20%);
 	display: block;
 	width: 0;
@@ -250,9 +258,9 @@ hr{
 	border-radius: 20px;
 	margin-bottom: 1em;
 	margin-top: 0px;
-	margin-left: 1em;
+	margin-left: 0.5em;
 	margin-right: 1em;
-	padding: 1em;
+	padding: 0.5em 1em 0.5em;
 	position: relative;
 }
 
@@ -261,7 +269,7 @@ hr{
 	content: '';
 	position: absolute;
 	border-style: solid;
-	border-width: 9px 0 9px 17px;
+	border-width: 9px 0 9px 20px;
 	border-color: transparent darken(white, 10%);
 	display: block;
 	width: 0;
@@ -414,6 +422,7 @@ hr{
 .sidebar-nav li {
     text-indent: 20px;
     line-height: 40px;
+    color: #FFFFFF;
 }
 
 .sidebar-nav li:hover {
@@ -423,7 +432,7 @@ hr{
 .sidebar-nav li a {
     display: block;
     text-decoration: none;
-    color: #999999;
+    color: #FFFFFF;
 }
 
 .sidebar-nav li a:hover {
