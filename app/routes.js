@@ -16,7 +16,7 @@ var io = require('socket.io').listen(server);
 
 	// show the home page (will also have our login links)
 	app.get('/', function(req, res) {
-		res.render('index.ejs');
+		res.render('login.ejs');
 	});
 
 	// PROFILE SECTION =========================
@@ -89,6 +89,7 @@ var io = require('socket.io').listen(server);
 		// LOGIN ===============================
 		// show the login form
 		app.get('/login', function(req, res) {
+			console.log(req.flash('loginMessage').toString());
 			res.render('login.ejs', { message: req.flash('loginMessage') });
 		});
 
@@ -107,7 +108,7 @@ var io = require('socket.io').listen(server);
 
 		// process the signup form
 		app.post('/signup', passport.authenticate('local-signup', {
-			successRedirect : '/profile', // redirect to the secure profile section
+			successRedirect : '/groups', // redirect to the secure profile section
 			failureRedirect : '/signup', // redirect back to the signup page if there is an error
 			failureFlash : true // allow flash messages
 		}));
