@@ -4,80 +4,135 @@
 	<title>Groups List</title>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-	<style>
-		body 		{ padding-top:80px; word-wrap:break-word; }
+		<style>
+		html, body {
+			height: 100%;
+			margin: 0px 0px;
+			background-color: #323232;
+		}
+		.verticalcenter {
+			height: 100vh;
+			margin-left: auto;
+   			margin-right: auto;
+
+		}
+		.btn-warning {
+			background-color: #FFA726;
+			border-width: 0px;
+		}
+		.signup,.login{ 
+			color:#707070; 
+			line-height: 30px;
+		}
+		a:hover{
+			text-decoration: none;
+			color:#909090;
+		}
+		.groupbox{
+			background-color: #404040;
+			border-radius: 40px;
+			padding: 30px 30px;
+		}
+		.groupofgroups{
+			color: #EEEEEE;
+			font-weight: bold;
+		}
+		.table th, .table td { 
+		     border-top: none !important; 
+		 }
+		 .nomargin {
+		 	margin-left: 0px;
+		 	margin-right: 0px;
+		 }
+		 .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
+		   background-color: #555;
+		}
+		a{
+			color: #DDD;
+		}
+		.unjoined{
+			color: #AAA;
+		}
 	</style>
 </head>
 <body>
-<div class="container">
-
-	<div class="page-header text-center">
-		<h1><span class="fa fa-anchor"></span> Groups List</h1>
-		<!-- <a href="/logout" class="btn btn-default btn-sm">Logout</a> -->
-		<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#addGroupModal">
+<div class="container verticalcenter">
+	<div class="row">
+		<div class="col-sm-4 col-sm-offset-4 ">
+			<img src="./img/logo.png" style="max-width:100%; max-height:100%; padding-top:20px; padding-bottom:20px;">
+		</div>
+	</div>
+	<div class="row text-right" style="padding-bottom:10px;">
+		<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addGroupModal">
 		  New Group
 		</button>
 	</div>
-	My Groups
-	<div class="row">
-		<table class="table">
-			<tbody>
-				<% (user.groups).forEach(function(group,i){ %>
-					<tr>
-						<td><a href="/chat/<%=group.groupId%>"><%= group.groupName %></a></td>
-						<td><%= group.unseen %></td>
-						<td>
-							<% if(own[i]) {%>
-								<a href="/delete/<%= group.groupId %>">Delete</a>
-							<%} %>
+	<div class="row groupbox">
+		<div class="col-sm-6" style="border-right: 1px solid #555;">
+			<p class="groupofgroups">My Groups</p>
+			<div class="row nomargin">
+				<table class="table table-striped" style="background-color:#454545; ">
+					<tbody>
+						<% (user.groups).forEach(function(group,i){ %>
+							<tr>
+								<td style="vertical-align:middle"><a href="/chat/<%=group.groupId%>"><%= group.groupName %> (<%= group.unseen %>)</a></td>
+								<td style="width:60px;">
+									<% if(own[i]) {%>
+										<a class="btn btn-danger btn-sm" href="/delete/<%= group.groupId %>">Delete</a>
+									<%}else {%>
+										<a class="btn btn-danger btn-sm disabled">Delete</a>
+									<% } %>
+								</td>
+								<td style="width:60px;"><a class="btn btn-warning btn-sm" href="/leave/<%= group.groupId %>">Leave</a></td>
+							</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div class="col-sm-6">
+			<p class="groupofgroups">Other Groups</p>
+			<div class="row nomargin">
+				<table class="table table-striped">
+					<tbody>
+						<% groups.forEach(function(group){ %>
+							<tr>
+								<td style="vertical-align:middle; padding-left:10px" class="unjoined"><%= group.name %></td>
+								<td style="width:60px;"><a class="btn btn-info btn-sm" href="/join/<%= group.id %>">Join</a></td>
+							</tr>
+						<% }) %>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		
+		
 
-						</td>
-						<td><a href="/leave/<%= group.groupId %>">Leave</a></td>
-					</tr>
-				<% }) %>
-			</tbody>
-		</table>
-	</div>
-	Other Groups
-	<div class="row">
-		<table class="table">
-			<tbody>
-				<% groups.forEach(function(group){ %>
-					<tr>
-						<td><%= group.name %></td>
-						<td><%= group.creatorId %></td>
-						<!-- <td><%= group.unseen %></td> -->
-						<td><a href="/join/<%= group.id %>">Join</a></td>
-					</tr>
-				<% }) %>
-			</tbody>
-		</table>
-	</div>
+		
 
-	
-
-	<div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-dialog">
-	    <div class="modal-content">
-	      <div class="modal-header">
-	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-	        <h4 class="modal-title" id="myModalLabel">Add Group</h4>
-	      </div>
-	      <div class="modal-body">
-	      	<form method="POST" action="addGroup">
-	      		<div class="form-group">
-	      			<label>Group Name</label>
-	      			<input name="groupName" class="form-control">
-	      		</div>
-	      		<button type="submit" class="btn btn-primary">Add Group</button>
-	      	</form>
-	      </div><!-- 
-	      <div class="modal-footer">
-	        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button><!-- 
-	        <button type="button" class="btn btn-primary">Save changes</button> -->
-	      </div> -->
-	    </div>
-	  </div>
+		<div class="modal fade" id="addGroupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Add Group</h4>
+		      </div>
+		      <div class="modal-body">
+		      	<form method="POST" action="addGroup">
+		      		<div class="form-group">
+		      			<label>Group Name</label>
+		      			<input name="groupName" class="form-control">
+		      		</div>
+		      		<button type="submit" class="btn btn-primary">Add Group</button>
+		      	</form>
+		      </div><!-- 
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button><!-- 
+		        <button type="button" class="btn btn-primary">Save changes</button> -->
+		      </div> -->
+		    </div>
+		  </div>
+		</div>
 	</div>
 
 </div>
