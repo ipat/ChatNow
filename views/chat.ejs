@@ -121,12 +121,14 @@
 				      		<button type="submit" id="send" class="sendButton">&#8657;</button>
 					      
 					    </form>
-					</div>
-					<footer class="footer">
-				      <div class="container">
-				        <p class="text-muted">Place sticky footer content here.</p>
-				      </div>
-				    </footer> -->
+					</div> -->
+					<footer class="footer msgbox">
+				        <form action="/chat/<%=group.id %>" style="text-align:center;" id="submitMessage" method="POST">
+							<input name="message" id="message" autocomplete="off" placeholder="Type your message here..." />
+				      		<button type="submit" id="send" class="sendButton">&#8657;</button>
+					      
+					    </form>	
+				    </footer>
 
 				</div>
 			</div>
@@ -152,6 +154,9 @@
     	dataRead.lastMsgIndex = '<%=group.messages.length %>';
     	socket.emit('read', dataRead);
     	$(".content").animate({ scrollTop: $('.content')[0].scrollHeight}, 500);
+    	
+    	contentWidth = $(".content").width();
+		$(".msgbox").width(contentWidth);	
     	// socket.on(group.id, function(msg){
 	    //     // var temp = msg['name'] + " : " + msg['msg'];
 	    //     // if(msg['name']==user) {
@@ -181,6 +186,12 @@
 
 		  
 		});
+
+    	$(window).resize(function() {
+    		contentWidth = $(".content").width();
+    		$(".msgbox").width(contentWidth);
+    	});
+
 
 		socket.on('callback', function(data) {
 		  console.log(data.done);
