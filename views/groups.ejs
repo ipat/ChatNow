@@ -11,7 +11,6 @@
 			background-color: #323232;
 		}
 		.verticalcenter {
-			height: 100vh;
 			margin-left: auto;
    			margin-right: auto;
 
@@ -29,7 +28,7 @@
 			color:#909090;
 		}
 		.groupbox{
-			background-color: #404040;
+			background-color: #333333;
 			border-radius: 40px;
 			padding: 30px 30px;
 		}
@@ -41,11 +40,11 @@
 		     border-top: none !important; 
 		 }
 		 .nomargin {
-		 	margin-left: 0px;
+		 	margin-left: 15px;
 		 	margin-right: 0px;
 		 }
 		 .table-striped > tbody > tr:nth-child(2n+1) > td, .table-striped > tbody > tr:nth-child(2n+1) > th {
-		   background-color: #555;
+		   background-color: #3F3F3F;
 		}
 		a{
 			color: #DDD;
@@ -53,24 +52,39 @@
 		.unjoined{
 			color: #AAA;
 		}
+		@media (min-width: 845px) {
+			.rightborder{
+				border-right: 1px solid #555;
+			}
+		}
+		.rightborder{
+		}
+		
 	</style>
 </head>
 <body>
-<div class="container verticalcenter">
+<div style="margin-left:0px; margin-right:0px;">
+
 	<div class="row">
-		<div class="col-sm-4 col-sm-offset-4 ">
-			<img src="./img/logo.png" style="max-width:100%; max-height:100%; padding-top:20px; padding-bottom:20px;">
+		<div class="col-sm-6 col-sm-offset-3 ">
+			<img src="./img/logoalt.png" style="max-width:100%; max-height:100%; padding-top:20px; padding-bottom:20px;">
 		</div>
 	</div>
+
+</div>
+<div class="container verticalcenter">
+	
 	<div class="row text-right" style="padding-bottom:10px;">
 		<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addGroupModal">
 		  New Group
 		</button>
+		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
 	</div>
 	<div class="row groupbox">
-		<div class="col-sm-6" style="border-right: 1px solid #555;">
+		<div class="col-sm-6 rightborder">
 			<p class="groupofgroups">My Groups</p>
 			<div class="row nomargin">
+				<% if((user.groups).length ==0) {%> <p style="color: #888">You havn't joined any group. </p><% } %>
 				<table class="table table-striped" style="background-color:#454545; ">
 					<tbody>
 						<% (user.groups).forEach(function(group,i){ %>
@@ -78,12 +92,12 @@
 								<td style="vertical-align:middle"><a href="/chat/<%=group.groupId%>"><%= group.groupName %> (<%= group.unseen %>)</a></td>
 								<td style="width:60px;">
 									<% if(own[i]) {%>
-										<a class="btn btn-danger btn-sm" href="/delete/<%= group.groupId %>">Delete</a>
+										<a class="btn btn-danger btn-xs" href="/delete/<%= group.groupId %>">Delete</a>
 									<%}else {%>
-										<a class="btn btn-danger btn-sm disabled">Delete</a>
+										<a class="btn btn-danger btn-xs disabled">Delete</a>
 									<% } %>
 								</td>
-								<td style="width:60px;"><a class="btn btn-warning btn-sm" href="/leave/<%= group.groupId %>">Leave</a></td>
+								<td style="width:60px;"><a class="btn btn-warning btn-xs" href="/leave/<%= group.groupId %>">Leave</a></td>
 							</tr>
 						<% }) %>
 					</tbody>
@@ -93,12 +107,13 @@
 		<div class="col-sm-6">
 			<p class="groupofgroups">Other Groups</p>
 			<div class="row nomargin">
-				<table class="table table-striped">
+				<% if(groups.length ==0) {%> <p style="color: #888">You have joined every group. </p><% } %>
+				<table class="table table-striped" style="background-color:#454545">
 					<tbody>
 						<% groups.forEach(function(group){ %>
 							<tr>
 								<td style="vertical-align:middle; padding-left:10px" class="unjoined"><%= group.name %></td>
-								<td style="width:60px;"><a class="btn btn-info btn-sm" href="/join/<%= group.id %>">Join</a></td>
+								<td style="width:60px;"><a class="btn btn-info btn-xs" href="/join/<%= group.id %>">Join</a></td>
 							</tr>
 						<% }) %>
 					</tbody>

@@ -16,7 +16,7 @@ var io = require('socket.io').listen(server);
 
 	// show the home page (will also have our login links)
 	app.get('/', function(req, res) {
-		res.render('login.ejs');
+		res.redirect('/groups');
 	});
 
 	// PROFILE SECTION =========================
@@ -89,8 +89,11 @@ var io = require('socket.io').listen(server);
 		// LOGIN ===============================
 		// show the login form
 		app.get('/login', function(req, res) {
-			console.log(req.flash('loginMessage').toString());
-			res.render('login.ejs', { message: req.flash('loginMessage') });
+			//console.log(req.flash('loginMessage').toString()+'sssss');
+			var msg = req.flash('loginMessage').toString();
+			res.render('login.ejs', { message: msg});
+			//res.render('login.ejs', { message: 'asdfsadfsad' });
+
 		});
 
 		// process the login form
@@ -517,5 +520,5 @@ function isLoggedIn(req, res, next) {
 	if (req.isAuthenticated())
 		return next();
 
-	res.redirect('/');
+	res.redirect('/login');
 }
