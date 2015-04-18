@@ -53,6 +53,15 @@
 		.unjoined{
 			color: #AAA;
 		}
+		@media (min-width: 845px) {
+			.rightborder{
+				border-right: 1px solid #555;
+			}
+		}
+		.rightborder{
+			
+		}
+		
 	</style>
 </head>
 <body>
@@ -66,11 +75,13 @@
 		<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addGroupModal">
 		  New Group
 		</button>
+		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
 	</div>
 	<div class="row groupbox">
-		<div class="col-sm-6" style="border-right: 1px solid #555;">
+		<div class="col-sm-6 rightborder">
 			<p class="groupofgroups">My Groups</p>
 			<div class="row nomargin">
+				<% if((user.groups).length ==0) {%> <p style="color: #888">You havn't joined any group. </p><% } %>
 				<table class="table table-striped" style="background-color:#454545; ">
 					<tbody>
 						<% (user.groups).forEach(function(group,i){ %>
@@ -93,6 +104,7 @@
 		<div class="col-sm-6">
 			<p class="groupofgroups">Other Groups</p>
 			<div class="row nomargin">
+				<% if(groups.length ==0) {%> <p style="color: #888">You have joined every group. </p><% } %>
 				<table class="table table-striped">
 					<tbody>
 						<% groups.forEach(function(group){ %>
