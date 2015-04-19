@@ -242,7 +242,8 @@ hr {
 
 #wrapper.toggled #page-content-wrapper {
   position: absolute;
-  margin-right: -250px; }
+  margin-right: -250px;
+  overflow-x: hidden; }
 
 /* Sidebar Styles */
 .sidebar-nav {
@@ -300,26 +301,6 @@ hr {
   color: #fff;
   background: none; }
 
-@media (min-width: 768px) {
-  #wrapper {
-    padding-left: 250px; }
-
-  #wrapper.toggled {
-    padding-left: 0; }
-
-  #sidebar-wrapper {
-    width: 250px; }
-
-  #wrapper.toggled #sidebar-wrapper {
-    width: 0; }
-
-  #page-content-wrapper {
-    padding: 20px;
-    position: relative; }
-
-  #wrapper.toggled #page-content-wrapper {
-    position: relative;
-    margin-right: 0; } }
 .footer {
   position: fixed;
   bottom: 0;
@@ -346,5 +327,11 @@ hr {
 
 ::-webkit-scrollbar-thumb:window-inactive {
   background: #323232; }
+
+.btn-theme {
+  background-color: #7f7f7f;
+  color: white; }
+  .btn-theme :hover {
+    color: #e6e6e6; }
 
 /*# sourceMappingURL=style.css.map */

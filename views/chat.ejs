@@ -13,14 +13,15 @@
 <body>
 <div class="header navbar-fixed-top">
 	<div class="weblogo">
-		<a href="/groups"><img src="/img/logo.png" style="height: 1.2em;"></a>|
+		<a href="/groups"><img src="/img/logoalt.png" style="height: 1.5em;"></a>|
 		<span style="font-size:0.8em; line-height: 1em;"><i class="fa fa-comment"></i> <%=group.name %></span>
-		<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+		<a href="#menu-toggle" class="btn btn-theme float-right" id="menu-toggle" style="line-height: 1em; font-size:0.5em; margin-top:0.5em;"><i class="fa fa-bars"></i></a>
+		<a href="/logout" class="btn btn-theme float-right" id="menu-toggle" style="line-height: 1em; font-size:0.5em; margin-right: 0.2em;margin-top:0.5em;"><i class="fa fa-unlock-alt"></i> Logout</a>
 	</div>
 </div>
 <div class="clear"></div>
 
-<div id="wrapper" class="toggled">
+<div id="wrapper" class="">
 	<!-- <div class="col-md-3 sidebar">
 		<ul>
 			<li><a href="/groups">Group List</a></li>
@@ -164,6 +165,16 @@
 	    //     // }
 	        
 	    //   });
+
+		$("#menu-toggle").click(function(){
+			$("#wrapper").toggleClass("toggled", 1000).promise().done(function(){
+				setTimeout(function() {
+	                  contentWidth = $(".content").width();
+						$(".msgbox").width(contentWidth);	
+	            }, 500);
+			    
+			});;
+		});
 
     	$('form').submit(function(){
 
