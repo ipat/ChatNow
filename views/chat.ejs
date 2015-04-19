@@ -13,14 +13,15 @@
 <body>
 <div class="header navbar-fixed-top">
 	<div class="weblogo">
-		<a href="/groups"><img src="/img/logo.png" style="height: 1.2em;"></a>|
+		<a href="/groups"><img src="/img/logoalt.png" style="height: 1.5em;"></a>|
 		<span style="font-size:0.8em; line-height: 1em;"><i class="fa fa-comment"></i> <%=group.name %></span>
-		<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Toggle Menu</a>
+		<a href="#menu-toggle" class="btn btn-theme float-right" id="menu-toggle" style="line-height: 1em; font-size:0.5em; margin-top:0.5em;"><i class="fa fa-bars"></i></a>
+		<a href="/logout" class="btn btn-theme float-right" id="menu-toggle" style="line-height: 1em; font-size:0.5em; margin-right: 0.2em;margin-top:0.5em;"><i class="fa fa-unlock-alt"></i> Logout</a>
 	</div>
 </div>
 <div class="clear"></div>
 
-<div id="wrapper" class="toggled">
+<div id="wrapper" class="">
 	<!-- <div class="col-md-3 sidebar">
 		<ul>
 			<li><a href="/groups">Group List</a></li>
@@ -144,7 +145,10 @@
 
     <script type="text/javascript">
     	var socket = io();
-    	socket.emit('create', '<%=group.id %>');
+    	var joinVar = {};
+    	joinVar.room = '<%=group.id %>';
+    	joinVar.name = '<%=user.local.email%>'
+    	socket.emit('create', joinVar);
     	var dataRead = {};
     	dataRead.userId = '<%=user.id%>';
     	dataRead.room = '<%=group.id %>';
@@ -164,6 +168,16 @@
 	    //     // }
 	        
 	    //   });
+
+		$("#menu-toggle").click(function(){
+			$("#wrapper").toggleClass("toggled", 1000).promise().done(function(){
+				setTimeout(function() {
+	                  contentWidth = $(".content").width();
+						$(".msgbox").width(contentWidth);	
+	            }, 500);
+			    
+			});;
+		});
 
     	$('form').submit(function(){
 
@@ -197,20 +211,28 @@
 
 		socket.on('recieve', function(data) {
 		  // console.log(data);
-		  data.userId = '<%=user.id %>';
-		  socket.emit('read', data);
-		  if(data.messageOwnerId.toString() == '<%=user.id.toString()%>') {
-		  	var temp = "<li class='myMessage float-right'><div class='msgTime float-left'>" + (new Date(data.time)).getDate() + "/" + ((new Date(data.time)).getMonth() + 1) + "<br>" + (new Date(data.time)).getHours() + ":" +(new Date(data.time)).getMinutes() + "</div><div class='msgBody-right float-left'><div class='msgName' style='text-align:right;''>" + data.messageOwnerName +"</div><b>" + data.message + "</b></div><div class='msgOwner float-left'>" + data.messageOwnerName + "</div> </li><div class='clear'></div>";
-		  	$('#messages').append(temp);
+		  if(data.joinGroup !== true) {
+			  data.userId = '<%=user.id %>';
+			  socket.emit('read', data);
+			  if(data.messageOwnerId.toString() == '<%=user.id.toString()%>') {
+			  	var temp = "<li class='myMessage float-right'><div class='msgTime float-left'>" + (new Date(data.time)).getDate() + "/" + ((new Date(data.time)).getMonth() + 1) + "<br>" + (new Date(data.time)).getHours() + ":" +(new Date(data.time)).getMinutes() + "</div><div class='msgBody-right float-left'><div class='msgName' style='text-align:right;''>" + data.messageOwnerName +"</div><b>" + data.message + "</b></div><div class='msgOwner float-left'>" + data.messageOwnerName + "</div> </li><div class='clear'></div>";
+			  	$('#messages').append(temp);
+			  } else {
+			  	var temp = "<li class='float-left'><div class='float-left'><div class='msgOwner float-left'>" + data.messageOwnerName + "</div></div><div class='msgBody-left float-left'><div class='msgName'>" + data.messageOwnerName + "</div><b>" + data.message + "</b></div><div class='msgTime float-left'>" + (new Date(data.time)).getDate() + "/" + ((new Date(data.time)).getMonth() + 1) + "<br>" + (new Date(data.time)).getHours() + ":" +(new Date(data.time)).getMinutes() + "</div></li><div class='clear'></div>";
+			  	$('#messages').append(temp);
+			  }
+			  // var temp = "<b>" + data.messageOwnerName + "</b> " + data.message;
+			  // $('#messages').append('<li>'+(temp)+'</li>');
+			  console.log($('.allContent')[0].scrollHeight);
+			  $("html, body").animate({ scrollTop: $('.allContent')[0].scrollHeight}, 500);
+			  // Print the data.data somewhere...
 		  } else {
-		  	var temp = "<li class='float-left'><div class='float-left'><div class='msgOwner float-left'>" + data.messageOwnerName + "</div></div><div class='msgBody-left float-left'><div class='msgName'>" + data.messageOwnerName + "</div><b>" + data.message + "</b></div><div class='msgTime float-left'>" + (new Date(data.time)).getDate() + "/" + ((new Date(data.time)).getMonth() + 1) + "<br>" + (new Date(data.time)).getHours() + ":" +(new Date(data.time)).getMinutes() + "</div></li><div class='clear'></div>";
+		  	var temp = "<li><div class='msgBody-center'><b>" + data.message + "</b></div></li>";
 		  	$('#messages').append(temp);
+		  	$("html, body").animate({ scrollTop: $('.allContent')[0].scrollHeight}, 500);
+
 		  }
-		  // var temp = "<b>" + data.messageOwnerName + "</b> " + data.message;
-		  // $('#messages').append('<li>'+(temp)+'</li>');
-		  console.log($('.allContent')[0].scrollHeight);
-		  $("html, body").animate({ scrollTop: $('.allContent')[0].scrollHeight}, 500);
-		  // Print the data.data somewhere...
+		  
 		});
     </script>
 </body>
