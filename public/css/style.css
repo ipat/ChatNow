@@ -100,6 +100,18 @@ hr {
   padding: 0.5em 1em 0.5em;
   position: relative; }
 
+.msgBody-center {
+  border-radius: 20px;
+  margin-bottom: 1em;
+  margin-top: 0px;
+  margin-left: 5em;
+  margin-right: 5em;
+  padding: 1em 1em 1em;
+  position: relative;
+  text-align: center;
+  margin: auto;
+  padding: auto; }
+
 .msgBody-left:after, .msgBody-left-unread:after {
   content: '';
   position: absolute;

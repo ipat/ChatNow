@@ -77,6 +77,7 @@ var io = require('socket.io').listen(server);
 
 	// LOGOUT ==============================
 	app.get('/logout', function(req, res) {
+		checkLeaveGroup({"name":req.user.local.email,"url":req.headers.referer});
 		req.logout();
 		res.redirect('/');
 	});
@@ -255,6 +256,7 @@ var io = require('socket.io').listen(server);
 
 	// GROUPS SECTION =========================
 	app.get('/groups', isLoggedIn, function(req, res) {
+		checkLeaveGroup({"name":req.user.local.email,"url":req.headers.referer});
 		var groups = [];
 		var unjoined = [];
 		var jgroups = [];
@@ -403,7 +405,7 @@ var io = require('socket.io').listen(server);
 
 	app.get('/chat/:groupId', function(req, res){
 		var groupId = req.params.groupId;
-
+		checkLeaveGroup({"name":req.user.local.email,"url":req.headers.referer});
 		var user = req.user;
 		var userGroups = user.groups;
 		var inGroup = false;
@@ -449,9 +451,14 @@ var io = require('socket.io').listen(server);
 	    console.log('message: ' + msg);
 	  });
 
-	  socket.on('create', function(room) {
-	  	socket.join(room);
-	  	console.log('Join Rooom ' + room);
+	  socket.on('create', function(joinVar) {
+	  	console.log(joinVar);
+	  	socket.join(joinVar.room);
+	  	// console.log('Join Rooom ' + room);
+	  	msg = {};
+	  	msg.joinGroup = true;
+	  	msg.message = joinVar.name + " connected to the group";
+	  	io.sockets.in(joinVar.room).emit('recieve', msg);
 	  });
 
 	  socket.on('read', function(info) {
@@ -482,6 +489,7 @@ var io = require('socket.io').listen(server);
 	  		{$push: {messages:saveMsg}},
 	  		function(err, groupInfo){
 	  			msg.lastMsgIndex = groupInfo.messages.length;
+	  			msg.joinGroup = false;
 	  			io.sockets.in(msg.room).emit('recieve', msg);
 	  		});
 
@@ -513,7 +521,21 @@ var io = require('socket.io').listen(server);
 	});
 
 
+function checkLeaveGroup(data) {
+	var parts = data.url.split("/");
+	if(parts[parts.length - 2] == "chat") {
+		msg = {};
+	  	msg.joinGroup = true;
+	  	msg.message = "<span style='color:red;'>" + data.name + " left the group</span>";
+	  	io.sockets.in(parts[parts.length - 1]).emit('recieve', msg);
+	}
+	console.log(parts[parts.length - 2]);
+}
+
+
 };
+
+
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
