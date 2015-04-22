@@ -4,16 +4,17 @@
 	<title>Groups List</title>
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+	<link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
 		<style>
 		html, body {
 			height: 100%;
 			margin: 0px 0px;
 			background-color: #323232;
+			font-family: 'Oxygen', sans-serif;
 		}
 		.verticalcenter {
 			margin-left: auto;
    			margin-right: auto;
-
 		}
 		.btn-warning {
 			background-color: #FFA726;
@@ -28,8 +29,6 @@
 			color:#909090;
 		}
 		.groupbox{
-			background-color: #333333;
-			border-radius: 40px;
 			padding: 30px 30px;
 		}
 		.groupofgroups{
@@ -59,26 +58,44 @@
 		}
 		.rightborder{
 		}
-		
+		.newgroup, .logout {
+			width: 10em;
+			height: 2em;
+			text-align: center;
+			border-radius: 20%/100%;
+			border:none;
+		}
+		button:hover {
+			background-color: #999;
+		}
+		.unseen{
+			background-color: #D96250;
+			display: inline;
+			padding-left: 5px;
+			padding-right: 5px;
+			border-radius: 5px;
+			height: 1em;
+			vertical-align: middle;
+			font-size: 0.8em
+		}
 	</style>
 </head>
 <body>
-<div style="margin-left:0px; margin-right:0px;">
+<div style="margin-left:0px; margin-right:0px; container verticalcenter">
 
-	<div class="row">
-		<div class="col-sm-6 col-sm-offset-3 ">
-			<img src="./img/logoalt.png" style="max-width:100%; max-height:100%; padding-top:20px; padding-bottom:20px;">
+	<div class="row" style="background-color: #2a2a2a;"> 
+		<div class="row">
+			<div class="col-sm-6 col-sm-offset-3 ">
+				<img src="./img/logoalt.png" style="max-width:100%; max-height:100%; padding-top:20px; padding-bottom:20px;">
+			</div>
 		</div>
-	</div>
+		<div class="row" style="padding-bottom:20px; text-align: center;">
+			<button type="button" class="newgroup" data-toggle="modal" data-target="#addGroupModal"> 
+				<span class="glyphicon glyphicon-plus"></span> New Group
+			</button>
+			<button onclick="window.location='/logout';" class="logout"><span class="glyphicon glyphicon-user"></span> Logout</button>
 
-</div>
-<div class="container verticalcenter">
-	
-	<div class="row text-right" style="padding-bottom:10px;">
-		<button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#addGroupModal">
-		  New Group
-		</button>
-		<a href="/logout" class="btn btn-default btn-sm">Logout</a>
+		</div>
 	</div>
 	<div class="row groupbox">
 		<div class="col-sm-6 rightborder">
@@ -89,7 +106,7 @@
 					<tbody>
 						<% (user.groups).forEach(function(group,i){ %>
 							<tr>
-								<td style="vertical-align:middle"><a href="/chat/<%=group.groupId%>"><%= group.groupName %> (<%= group.unseen %>)</a></td>
+								<td style="vertical-align:middle"><a href="/chat/<%=group.groupId%>"><%= group.groupName %> <p class="unseen"><%= group.unseen %></p></a></td>
 								<td style="width:60px;">
 									<% if(own[i]) {%>
 										<a class="btn btn-danger btn-xs" href="/delete/<%= group.groupId %>">Delete</a>
